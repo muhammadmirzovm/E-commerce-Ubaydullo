@@ -11,6 +11,9 @@ class User(AbstractUser):
         choices=Role.choices,
         default=Role.BUYER
     )
+    image = models.ImageField(upload_to="avatars/", null=True, blank=True)
+    phone_number = models.CharField(max_length=13, help_text="+998998889911")
+    address = models.CharField(max_length=255) 
     
     def __str__(self):
         return f'{self.username} -> {self.role}'

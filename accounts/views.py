@@ -2,10 +2,10 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView, ListView, DeleteView
-
-from .forms import SignUpForm
-
+from django.views.generic import CreateView, DetailView, ListView, DeleteView,UpdateView
+from .models import User
+from .forms import SignUpForm, ProfileForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 class SignUpView(CreateView):
     form_class = SignUpForm
     template_name = 'accounts/signup.html'
@@ -38,4 +38,30 @@ class CustomLogoutView(LogoutView):
     def dispatch(self, request, *args, **kwargs):
         messages.info(request, "Tizimdan chiqdingiz .")
         return super().dispatch(request, *args, **kwargs)
+    
+
+class ProfileDetailView( DetailView):
+    model = User
+    template_name = "accounts/profile_detail.html"
+    context_object_name = "profile_user"
+    
+    def get_object(self):
+        return self.request.user
+    
+    
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    model = User
+    template_name = "accounts/profile_edit.html"
+    form_class =  ProfileForm
+    success_url = reverse_lazy("profile_detail")
+    def get_object(self):
+        return self.request.user
+    def form_valid(self, form):
+        messages.success(self.request, "Profil yangilandi")
+        return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        messages.error(self.request, "Yangilashda xatolik !")
+        return super().form_invalid(form)
+    
     

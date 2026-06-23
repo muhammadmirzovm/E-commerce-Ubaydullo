@@ -13,11 +13,11 @@
      
       <div class="right d-flex justify-content-center align-items-center">
         {% if user.is_authenticated %}
-         <div style="width:30px;height:30px;" class="mx-2 rounded rounded-circle bg-dark text-white d-flex justify-content-center align-items-center">
+         <a href="{% url 'profile_detail' %}" style="width:30px;height:30px;" class="text-decoration-none mx-2 rounded rounded-circle bg-dark text-white d-flex justify-content-center align-items-center">
 
-                {{ user.username|slice:1 }}
+                {{ user.username|slice:1|title }}
 
-          </div>
+          </a>
           <form method="post" action="{% url 'logout' %}">
             {% csrf_token %}
             <button class="btn btn-dark"><i class="bi bi-box-arrow-right"></i></button>
