@@ -4,7 +4,7 @@ from django.conf import settings
 class Category(models.Model):
     name = models.CharField()
     slug = models.SlugField(max_length=255, unique=True)
-    parent = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True)
+    parent = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
     class Meta:
         verbose_name_plural = "Categories"
         verbose_name = "Category"

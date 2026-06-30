@@ -6,6 +6,57 @@
 <div class="container py-4">
 
   <h1 class="fs-4 fw-medium mb-4">Mahsulotlar</h1>
+<!-- FILTER FORM (GET) -->
+<form method="get" class="bg-white border rounded-4 shadow-sm p-3 mb-3">
+ <div class="row g-2 align-items-end">
+
+   <div class="col-md-4">
+     <label class="form-label small text-muted">Search</label>
+     <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Nomi yoki tavsif...">
+   </div>
+
+   <div class="col-md-3">
+     <label class="form-label small text-muted">Category</label>
+     <select name="category" class="form-select">
+       <option value="">All</option>
+       {% for c in categories %}
+         <option value="{{ c.slug }}" {% if category == c.slug %}selected{% endif %}>
+           {{ c.name }}
+         </option>
+         {% for child in c.children.all %}
+           <option value="{{ child.slug }}" {% if category == child.slug %}selected{% endif %}>
+             — {{ child.name }}
+           </option>
+         {% endfor %}
+       {% endfor %}
+     </select>
+   </div>
+
+   <div class="col-md-2">
+     <label class="form-label small text-muted">Min price</label>
+     <input type="text" name="min_price" value="{{ min_price }}" class="form-control" placeholder="100">
+   </div>
+
+   <div class="col-md-2">
+     <label class="form-label small text-muted">Max price</label>
+     <input type="text" name="max_price" value="{{ max_price }}" class="form-control" placeholder="500">
+   </div>
+   <div class="col-md-1">
+     <button class="btn btn-dark w-100">Go</button>
+   </div>
+   <div class="col-md-3">
+     <label class="form-label small text-muted">Sort</label>
+     <select name="sort" class="form-select">
+       <option value="latest" {% if sort == "latest" %}selected{% endif %}>Latest</option>
+       <option value="price_asc" {% if sort == "price_asc" %}selected{% endif %}>Cheap → Expensive</option>
+       <option value="price_desc" {% if sort == "price_desc" %}selected{% endif %}>Expensive → Cheap</option>
+     </select>
+   </div>
+   <div class="col-md-2">
+     <a class="btn btn-outline-secondary w-100" href="{% url 'product_list' %}">Reset</a>
+   </div>
+ </div>
+</form>
 
   <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
     {% for p in products %}
@@ -40,28 +91,22 @@
   </div>
 
   {% if is_paginated %}
-  <nav class="mt-4">
-    <ul class="pagination pagination-sm">
-      {% if page_obj.has_previous %}
-        <li class="page-item">
-          <a class="page-link" href="?page={{ page_obj.previous_page_number }}">← Oldingi</a>
-        </li>
-      {% endif %}
+ <nav class="mt-4">
+   <ul class="pagination">
+     {% if page_obj.has_previous %}
+       <li class="page-item">
+         <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">Oldingi</a></li>
+     {% endif %}
+     <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+     {% if page_obj.has_next %}
+       <li class="page-item">
+         <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">Keyingi</a>
+       </li>
+     {% endif %}
+   </ul>
+ </nav>
+{% endif %}
 
-      <li class="page-item disabled">
-        <span class="page-link text-muted">
-          {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
-        </span>
-      </li>
-
-      {% if page_obj.has_next %}
-        <li class="page-item">
-          <a class="page-link" href="?page={{ page_obj.next_page_number }}">Keyingi →</a>
-        </li>
-      {% endif %}
-    </ul>
-  </nav>
-  {% endif %}
 
 </div>
 {% endblock %}
