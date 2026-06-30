@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Product form{% endblock %}
+
+{% block body %}
+<div class="container col-6 border rounded p-4 my-5 bg-light">
+       <h1 class="h4 mb-3 text-center">Product</h1>
+
+       <!-- main_image borligi uchun enctype shart -->
+       <form method="post" enctype="multipart/form-data">
+         {% csrf_token %}
+         {{ form|crispy }}
+
+         <div class="d-flex gap-2">
+           <button class="btn btn-dark">Save</button>
+           <a class="btn btn-outline-secondary" href="{% url 'seller_products' %}">Cancel</a>
+         </div>
+       </form>
+
+</div>
+{% endblock %}
+
+
