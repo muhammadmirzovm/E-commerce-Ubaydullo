@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <a href="{% url 'product_list' %}" class="small text-muted text-decoration-none d-inline-flex align-items-center gap-1 mb-4">
+    ← Orqaga
+  </a>
+
+  <div class="row g-4">
+
+    <div class="col-md-5">
+      <div class="rounded-3 border overflow-hidden">
+        {% if product.main_image %}
+          <img src="{{ product.main_image.url }}" alt="{{ product.name }}"
+               class="img-fluid w-100 object-fit-cover" style="aspect-ratio:1/1">
+        {% else %}
+          <div class="bg-light d-flex align-items-center justify-content-center text-muted small"
+               style="aspect-ratio:1/1">No image</div>
+        {% endif %}
+      </div>
+
+      {% if product.images.all %}
+      <div class="d-flex gap-2 mt-3 flex-wrap">
+        {% for img in product.images.all %}
+          <img src="{{ img.image.url }}" alt="{{ img.alt_text }}"
+               class="border rounded-2 object-fit-cover"
+               style="width:72px; height:72px;">
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="col-md-7">
+
+      <p class="text-muted small mb-1">
+        {{ product.seller.username }}
+        {% if product.category %}
+          <span class="mx-1">·</span>{{ product.category.name }}
+        {% endif %}
+      </p>
+
+      <h1 class="fs-4 fw-medium mb-2">{{ product.name }}</h1>
+
+      <p class="fs-5 fw-medium mb-3">{{ product.price }} so'm</p>
+
+      {% if product.short_description %}
+        <p class="text-muted small mb-3">{{ product.short_description }}</p>
+      {% endif %}
+
+      {% if product.description %}
+        <p class="small mb-3">{{ product.description }}</p>
+      {% endif %}
+
+      <div class="border-top pt-3 mb-4">
+        <div class="d-flex gap-4">
+          <div>
+            <p class="text-muted mb-0" style="font-size:12px">Stock</p>
+            <p class="small fw-medium mb-0">{{ product.stock }}</p>
+          </div>
+          <div>
+            <p class="text-muted mb-0" style="font-size:12px">Status</p>
+            {% if product.is_active %}
+              <span class="badge bg-success-subtle text-success fw-normal" style="font-size:12px">Active</span>
+            {% else %}
+              <span class="badge bg-secondary-subtle text-secondary fw-normal" style="font-size:12px">Inactive</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-dark btn-sm px-4 py-2 disabled" disabled>
+        Add to cart
+      </button>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
