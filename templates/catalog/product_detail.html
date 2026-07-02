@@ -2,7 +2,7 @@
 
 {% block title %}{{ product.name }}{% endblock %}
 
-{% block content %}
+{% block body %}
 <div class="container py-4">
 
   <a href="{% url 'product_list' %}" class="small text-muted text-decoration-none d-inline-flex align-items-center gap-1 mb-4">
@@ -71,9 +71,23 @@
         </div>
       </div>
 
-      <button class="btn btn-dark btn-sm px-4 py-2 disabled" disabled>
-        Add to cart
-      </button>
+    {% if request.user.is_authenticated %}
+ <form method="post" action="{% url 'cart_add' product.id %}" class="d-flex gap-2">
+   {% csrf_token %}
+   <input type="number" name="qty" value="1" min="1" max="100" class="form-control" style="max-width:120px;">
+   <button class="btn btn-success">Add to cart +</button>
+   <a class="btn btn-outline-dark" href="{% url 'cart_detail' %}">View cart</a>
+ </form>
+{% else %}
+ <div class="alert alert-light border">
+   Savatchaga qo‘shish uchun login qiling.
+   <a class="btn btn-dark btn-sm ms-2"
+      href="{% url 'login' %}?next={% url 'product_detail' product.slug %}">
+     Login
+   </a>
+ </div>
+{% endif %}
+
 
     </div>
   </div>
