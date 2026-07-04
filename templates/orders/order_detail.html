@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.id }}{% endblock %}
+{% block body %}
+<div class="container bg-light border rounded p-4 my-5">
+    <h1 class="h4 mb-3">Order #{{ order.id }}</h1>
+<div class="row g-3">
+ <div class="col-lg-6">
+   <div class="card shadow-sm border rounded-4">
+     <div class="card-body">
+       <div><strong>Name:</strong> {{ order.full_name }}</div>
+       <div><strong>Phone:</strong> {{ order.phone }}</div>
+       <div><strong>Address:</strong> {{ order.address }}</div>
+       <div><strong>Delivery:</strong> {{ order.delivery_method }}</div>
+       {% if order.note %}<div><strong>Note:</strong> {{ order.note }}</div>{% endif %}</div></div></div>
+ <div class="col-lg-6">
+   <div class="card shadow-sm border rounded-4">
+     <div class="card-body">
+       <h2 class="h6 mb-3">Items</h2>
+       {% for item in order.items.all %}
+         <div class="d-flex justify-content-between"><div>
+             <div class="fw-semibold">{{ item.product.name }}</div>
+             <div class="text-muted small">Qty: {{ item.qty }} • Seller: {{ item.seller.username }} • Status: {{item.status}}</div></div>
+           <div class="fw-semibold">{{ item.unit_price }}</div></div><hr>
+       {% endfor %}
+     </div></div> </div></div>
+</div>
+
+{% endblock %}
