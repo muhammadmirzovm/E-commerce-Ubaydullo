@@ -4,10 +4,10 @@ from django.views.generic import FormView , DetailView, UpdateView, ListView
 from django.urls import reverse_lazy  
 from django.contrib import messages  
 from cart.utils import get_or_create_cart    # cartni olish uchun (sizda bor)
-from .forms import CheckoutForm  
+from .forms import CheckoutForm  , OrderStatusForm
 from django.db import transaction  
 from .models import OrderItem  , Order
-
+from catalog.mixins import SellerRequiredMixin
 class CheckoutView(LoginRequiredMixin, FormView):
    template_name = "orders/checkout.html"  # checkout template
    form_class = CheckoutForm  # form
@@ -78,4 +78,61 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
 
    def get_queryset(self):
        return Order.objects.filter(user=self.request.user)  # boshqa user orderini ocholmaydi
+
+
+
+class SellerOrderListView(SellerRequiredMixin, ListView):
+   model = Order
+   template_name = "orders/seller/order_list.html"
+   context_object_name = "orders"
+   paginate_by = 20  # sahifalab ko‘rsatish
+   def get_queryset(self):
+       # Seller hamma orderlarni ko‘radi (yangilari tepada)
+       return Order.objects.select_related("user").order_by("-created_at")
+
+
+class SellerOrderStatusUpdateView(SellerRequiredMixin, UpdateView):
+   model = OrderItem  # status OrderItem’da turadi
+   form_class = OrderStatusForm
+   template_name = "orders/seller/order_status_update.html"
+   success_url = reverse_lazy("seller_order_items")  # update’dan keyin listga qaytadi
+
+   def get_queryset(self):
+       # Seller faqat o‘z item’ining statusini o‘zgartira oladi (security!)
+       return OrderItem.objects.filter(seller=self.request.user)
+
+   def form_valid(self, form):
+       # Status saqlanadi (UpdateView o‘zi save qiladi)
+       resp = super().form_valid(form)
+       messages.success(self.request, f"Order #{self.object.order_id} status yangilandi ✅")
+       return resp
+
+
+class SellerOrderItemListView(SellerRequiredMixin, ListView):
+   model = OrderItem
+   template_name = "orders/seller/order_items.html"
+   context_object_name = "items"
+   paginate_by = 20
+
+   def get_queryset(self):
+       # Seller faqat o‘ziga tegishli itemlarni ko‘radi
+       return (
+           OrderItem.objects
+           .filter(seller=self.request.user)
+           .select_related("order", "product", "order__user")  # buyer info uchun
+           .order_by("-order__created_at")
+       )
+       
+class SellerOrderItemDetailView(SellerRequiredMixin, DetailView):
+   model = OrderItem
+   template_name = "orders/seller/order_item_detail.html"
+   context_object_name = "item"
+
+   def get_queryset(self):
+       # Seller faqat o‘z item’ini ocholadi (security!)
+       return (
+           OrderItem.objects
+           .filter(seller=self.request.user)
+           .select_related("order", "product", "order__user")
+       )
 

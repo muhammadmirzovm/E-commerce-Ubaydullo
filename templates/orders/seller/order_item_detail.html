@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Order Item Detail{% endblock %}
+{% block body %}
+<div class="container border rounded bg-light p-4 my-5 ">
+  <h1 class="h4 mb-3">Order #{{ item.order.id }} — Item detail</h1>
+<div class="row g-3">
+ <div class="col-lg-6">
+   <div class="card shadow-sm border rounded-4">
+     <div class="card-body">
+       <h2 class="h6 mb-2">Product</h2>
+       <div class="fw-semibold">{{ item.product.name }}</div>
+       <div class="text-muted small">Qty: {{ item.qty }} • Unit: {{ item.unit_price }}</div>
+       <div class="mt-2"><span class="badge bg-secondary">Order status: {{ item.status }}</span></div>
+     </div></div> </div>
+ <div class="col-lg-6">
+   <div class="card shadow-sm border rounded-4">
+     <div class="card-body">
+       <h2 class="h6 mb-2">Buyer info</h2>
+       <div><strong>Name:</strong> {{ item.order.full_name }}</div>
+       <div><strong>Phone:</strong> {{ item.order.phone }}</div>
+       <div><strong>Address:</strong> {{ item.order.address }}</div>
+       <div class="text-muted small mt-2">Created: {{ item.order.created_at }}</div></div></div></div></div>
+<a class="btn btn-outline-secondary mt-3" href="{% url 'seller_order_items' %}">Back</a>
+<a class="btn btn-secondary mt-3" href="{% url 'seller_order_status' item.pk %}">Change status</a>
+</div>
+{% endblock %}
