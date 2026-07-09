@@ -1,13 +1,15 @@
-from .models import Product, Category
-from .forms import ProductForm
 from .mixins import SellerRequiredMixin, OwnerRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from decimal import Decimal, InvalidOperation
 from django.db.models import Q
-
-
+from .models import Product, Category, Review
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .forms import ProductForm, ReviewForm
+from .utils import can_review
+from django.db.models import Avg, Count
 class ProductListView(ListView):
    model = Product
    template_name = "catalog/product_list.html"
@@ -75,6 +77,20 @@ class ProductDetailView(DetailView):
     model = Product
     template_name = 'catalog/product_detail.html'
     context_object_name = 'product'
+    
+    def get_context_data(self, **kwargs):
+       ctx = super().get_context_data(**kwargs)
+       product = self.object 
+       ctx["reviews"] = product.reviews.select_related("user").order_by("-created_at")
+       ctx["avg_rating"] = product.reviews.aggregate(a=Avg("rating"))["a"] or 0
+       ctx["reviews_count"] = product.reviews.aggregate(c=Count("id"))["c"]
+       ctx["can_review"] = can_review(self.request.user, product)
+       if self.request.user.is_authenticated:
+           ctx["already_reviewed"] = product.reviews.filter(user=self.request.user).exists()
+       else:
+           ctx["already_reviewed"] = False
+       return ctx
+
 
 
 class SellerProductListView(SellerRequiredMixin, ListView):
@@ -122,3 +138,26 @@ class SellerProductDeleteView(SellerRequiredMixin, OwnerRequiredMixin, DeleteVie
 
 
 
+class ReviewCreateView(LoginRequiredMixin, CreateView):
+   model = Review
+   form_class = ReviewForm
+   template_name = "catalog/review_form.html"
+   def dispatch(self, request, *args, **kwargs):
+       # dispatch = view ishga tushishidan oldin tekshiruv qilish uchun qulay
+       self.product = get_object_or_404(Product, slug=kwargs["slug"], is_active=True)
+       # 1) sotib olganmi + delivered bo'lganmi?
+       if not can_review(request.user, self.product):
+           messages.error(request, "Review yozish uchun avval sotib olib, qabul qilishingiz kerak ❌")
+           return redirect("product_detail", slug=self.product.slug)
+       # 2) oldin review yozganmi? (duplicate bo'lmasin)
+       if Review.objects.filter(product=self.product, user=request.user).exists():
+           messages.info(request, "Siz bu mahsulotga allaqachon review yozgansiz ✅")
+           return redirect("product_detail", slug=self.product.slug)
+       return super().dispatch(request, *args, **kwargs)
+   def form_valid(self, form):
+       review = form.save(commit=False)  # hozircha DB ga yozmaymiz
+       review.product = self.product     # qaysi productga yozdi
+       review.user = self.request.user   # kim yozdi
+       review.save()                     # endi DB ga saqlaymiz
+       messages.success(self.request, "Review saqlandi ✅")
+       return redirect("product_detail", slug=self.product.slug)

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, ProductImage
+from .models import Category, Product, ProductImage, Review
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -24,3 +24,12 @@ class AdminProduct(admin.ModelAdmin):
 @admin.register(ProductImage)
 class AdminProductImage(admin.ModelAdmin):
     list_display = ("product", 'alt_text')
+    
+    
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+   list_display = ("product", "user", "rating", "created_at")  # admin listda ustunlar
+   list_filter = ("rating", "created_at")  # filterlar
+   search_fields = ("product__name", "user__username")  # qidiruv
+

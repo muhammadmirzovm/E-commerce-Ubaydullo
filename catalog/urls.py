@@ -10,3 +10,8 @@ urlpatterns = [
    path("seller/products/<int:pk>/delete/",  views.SellerProductDeleteView.as_view(), name="seller_product_delete"),
 
 ]
+
+
+urlpatterns += [
+   path("products/<slug:slug>/review/", views.ReviewCreateView.as_view(), name="product_review_create"),
+]

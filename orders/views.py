@@ -40,7 +40,7 @@ class CheckoutView(LoginRequiredMixin, FormView):
 
            if product.stock < item.qty:  # stock yetmasa
                messages.error(self.request, f"'{product.name}' uchun stock yetarli emas ❌")
-               raise ValueError("Not enough stock")  # atomic sabab hammasi bekor bo‘ladi
+               raise ValueError("Stock yetarli emas")  # atomic sabab hammasi bekor bo‘ladi
 
            OrderItem.objects.create(
                order=order,  # qaysi order
